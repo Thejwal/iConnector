@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Pie Chart Example</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+</head>
+<body>
+<div style="text-align: center;">
+    <h1 style="font-family: Arial, sans-serif; color: #333; font-size: 36px; font-weight: bold;">
+        ORDERS DASHBOARD
+    </h1>
+</div>
+<div style="font-family: Arial, sans-serif; color: #333; font-size: 14px; font-weight: bold; margin: 15px;" th:text="'Data fetched at: ' + ${timeStamp}"></div>
+<div style="display: flex; justify-content: space-around;">
+    <div>
+        <canvas id="myPieChart" width="400" height="400"></canvas>
+    </div>
+    <div>
+        <canvas id="myBarChart" width="400" height="400"></canvas>
+    </div>
+</div>
+<div id="regions_div" style="width: 900px; height: 500px; margin: 20px auto;"></div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+       var countryCount = /*[[${countryCount}]]*/;
+
+       var countryArrayBE = countryCount.map(obj => [obj.COUNTRY , obj.COUNTC]);
+       countryArrayBE.unshift(['Country', 'Popularity']);
+       console.log(countryArrayBE);
+        google.charts.load('current', {
+        'packages':['geochart'],
+      });
+      google.charts.setOnLoadCallback(drawRegionsMap);
+      function drawRegionsMap() {
+        var data = google.visualization.arrayToDataTable(countryArrayBE);
+      var options = {};
+      var chart = new google.visualization.GeoChart(document.getElementById('regions_div'));
+      chart.draw(data, options);
+    }
+    var completedCount = /*[[${completedCount}]]*/ 0;
+    var cancelledCount = /*[[${cancelledCount}]]*/ 0;
+    var inProgressCount = /*[[${inProgressCount}]]*/ 0;
+
+    var ctx = document.getElementById('myPieChart').getContext('2d');
+    var myPieChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ['Completed', 'IN-PROGRESS' , 'CANCELLED'],
+            datasets: [{
+                data: [completedCount, inProgressCount , cancelledCount],
+                backgroundColor: ['green', 'red' , 'yellow']
+            }]
+        },
+        options: {
+        maintainAspectRatio: false,
+        responsive: false, // Ensure chart does not resize responsively
+        width: 400,
+        height: 450
+    }
+    });
+
+    var years = [];
+    var counts = [];
+    /*[# th:each="yearCount : ${yearCount}"]*/
+        years.push([[${yearCount.year}]]);
+        counts.push([[${yearCount.county}]]);
+    /*[/]*/
+    console.log(counts);
+    console.log(years);
+    var ctx = document.getElementById('myBarChart').getContext('2d');
+    var myBarChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: years,
+            datasets: [{
+                label: 'Order Count',
+                data: counts,
+                backgroundColor: 'rgba(54, 162, 235, 0.6)', // Blue color for bars
+                borderColor: 'rgba(54, 162, 235, 1)', // Border color for bars
+                borderWidth: 1
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            responsive: false, // Ensure chart does not resize responsively
+            width: 500,
+            height: 450,
+            scales: {
+                y: {
+                    beginAtZero: true // Start y-axis at zero
+                }
+            }
+        }
+    });
+
+    /*]]>*/
+</script>
+</body>
+</html>
